@@ -26,42 +26,50 @@ def fill_fu(data):
     fNac = data.get("fechaNac","")
     if fNac and len(fNac)==10: fNac=f"{fNac[8:]}/{fNac[5:7]}/{fNac[:4]}"
     genero=data.get("genero",""); proc=data.get("procedencia","")
-    proc_x={"Salud pública":241,"Particular":305,"Escuela":355,"Otro":400}
+    proc_x={"Salud pública":252,"Particular":314,"Escuela":364,"Otro":409}
     px=proc_x.get(proc,0)
     D={"nome":"Dra. Guiselle Werlinger Arancibia","rut":"18.210.109-5",
         "reg":"477379","esp":"Neurologia Infantil","em":"gigi.werlinger@gmail.com"}
     packet=io.BytesIO()
     c=canvas.Canvas(packet,pagesize=(595.32,H))
-    c.setFont("Helvetica-Bold",9); c.drawString(48,729,data.get("nombre",""))
-    c.setFont("Helvetica",9); c.drawString(442,729,data.get("run",""))
+    c.setFont("Helvetica-Bold",9); c.drawString(48,734,data.get("nombre",""))
+    c.setFont("Helvetica",9);      c.drawString(442,734,data.get("run",""))
     c.setFont("Helvetica-Bold",10)
-    if genero=="Femenino": c.drawString(382,745,"X")
-    if genero=="Masculino": c.drawString(420,745,"X")
+    if genero=="Femenino":  c.drawString(375,734,"X")
+    if genero=="Masculino": c.drawString(409,734,"X")
     c.setFont("Helvetica",8.5)
-    c.drawString(48,714,fNac); c.drawString(144,714,data.get("edad",""))
-    c.drawString(246,714,data.get("nacionalidad","Chilena"))
-    c.drawString(337,714,data.get("lenguaFamilia","Español"))
-    c.drawString(444,714,"Español")
-    c.setFont("Helvetica-Bold",9); c.drawString(200,694,"X")
+    c.drawString(48, 710,fNac)
+    c.drawString(144,710,data.get("edad",""))
+    c.drawString(246,710,data.get("nacionalidad","Chilena"))
+    c.drawString(336,710,data.get("lenguaFamilia","Español"))
+    c.drawString(444,710,"Español")
+    c.setFont("Helvetica-Bold",9); c.drawString(209,670,"X")
     c.setFont("Helvetica",7.5)
     for i,line in enumerate(wrap(data.get("diagnostico_principal",""),38)):
-        c.drawString(350,694-i*9,line)
+        c.drawString(370,670-i*9,line)
     c.setFont("Helvetica",9)
-    c.drawString(48,629,D["nome"]); c.drawString(372,629,D["rut"]); c.drawString(477,629,D["reg"])
-    c.drawString(48,614,D["esp"])
+    c.drawString(48, 646,D["nome"])
+    c.drawString(372,646,D["rut"])
+    c.drawString(477,646,D["reg"])
+    c.drawString(48, 618,D["esp"])
     c.setFont("Helvetica-Bold",9)
-    if px: c.drawString(px,617,"X")
+    if px: c.drawString(px,632,"X")
     c.setFont("Helvetica",8.5)
-    c.drawString(48,590,D["em"]); c.drawString(201,590,data.get("fechaEval",""))
-    c.drawString(372,590,data.get("fechaReeval",""))
-    for start_y,field in [(520,"fu_examen_salud"),(363,"fu_diagnostico"),(260,"fu_indicaciones")]:
-        y=start_y
-        for line in wrap(data.get(field,""),90): c.drawString(48,y,line); y-=12
+    c.drawString(48, 570,D["em"])
+    c.drawString(201,570,data.get("fechaEval",""))
+    c.drawString(372,570,data.get("fechaReeval",""))
+    y=520
+    for line in wrap(data.get("fu_examen_salud",""),90): c.drawString(48,y,line); y-=12
+    y=362
+    for line in wrap(data.get("fu_diagnostico",""),90): c.drawString(48,y,line); y-=12
+    y=258
+    for line in wrap(data.get("fu_indicaciones",""),90): c.drawString(48,y,line); y-=12
     c.save(); packet.seek(0)
     orig=PdfReader(io.BytesIO(base64.b64decode(FU_PDF_B64)))
     ov=PdfReader(packet); writer=PdfWriter()
     page=orig.pages[0]; page.merge_page(ov.pages[0])
-    writer.add_page(page); out=io.BytesIO(); writer.write(out); return out.getvalue()
+    writer.add_page(page); out=io.BytesIO(); writer.write(out)
+    return out.getvalue()
 
 @app.route("/fu-pdf",methods=["POST","OPTIONS"])
 def fu_pdf():
@@ -74,6 +82,6 @@ def fu_pdf():
         return jsonify({"error":str(e)}),500
 
 @app.route("/")
-def health(): return "OK"
+def health(): return "OK - FU PDF API v2"
 
 if __name__=="__main__": app.run(host="0.0.0.0",port=10000)
