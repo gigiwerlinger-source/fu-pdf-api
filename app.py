@@ -74,13 +74,12 @@ def fill_fu(data):
     c.drawString(360, ry(140), data.get("lenguaFamilia", "Español"))
     c.drawString(460, ry(140), "Español")
 
-    # Motivo de consulta: check + solo codigo CIE10 (X425-X550)
+    # Motivo de consulta: check + SOLO codigo CIE10 extraido automaticamente
     c.setFont("Helvetica-Bold", 9)
     c.drawString(199, ry(179), "X")
+    cie = extract_cie10(data.get("cie10") or data.get("diagnostico_principal", ""))
     c.setFont("Helvetica", 8.5)
-    cie = data.get("cie10", data.get("diagnostico_principal", ""))
-    for i, line in enumerate(wrap_pts(cie, 125, "Helvetica", 8.5)):
-        c.drawString(425, ry(179) - i * 10, line)
+    c.drawString(425, ry(179), cie)
 
     # Medico: nombre, RUT, registro
     c.setFont("Helvetica", 9)
